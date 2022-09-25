@@ -1,11 +1,11 @@
 import { galleryItems } from './gallery-items.js';
 // Change code below this line
+const galleryContainerRef = document.querySelector(".gallery");
 
 const makeGalleryItemMarkup = (arr) => {
-    return arr
-        .map(({ description: descr, preview, original: orig }) => {
-            return `<div class="gallery__item">
-                        <a class="gallery__link" href="large-image.jpg">
+  return arr
+    .map(({ description: descr, preview, original: orig }) => {
+      return `        <a class="gallery__link" href="${orig}">
                             <img
                                 class="gallery__image"
                                 src="${preview}"
@@ -13,36 +13,32 @@ const makeGalleryItemMarkup = (arr) => {
                                 alt="${descr}"
                                 />
                         </a>
-                    </div>`;
-        })
-        .join('');
+               `;
+    })
+    .join("");
 };
 
-const galleryContainerRef = document.querySelector('.gallery');
-galleryContainerRef.innerHTML = makeGalleryItemMarkup(galleryItems);
+const picturesMarkup = makeGalleryItemMarkup(galleryItems);
+galleryContainerRef.insertAdjacentHTML("beforeend", picturesMarkup);
 
-const createLightboxInstance = (e) => {
-    const targetedImgUrl = e.target.dataset.source;
-    const instance = basicLightbox.create(`
-    <img src="${targetedImgUrl}" width="800" height="600">
-    `);
+galleryContainerRef.addEventListener("click", onGalleryItemsClick);
 
-    instance.show(
-        document.addEventListener('keydown', (e) => {
-            if (e.key && e.code === 'Escape') {
-                instance.close();
-            }
-        })
-    );
-};
+function onGalleryItemsClick(e) {
+  e.preventDefault();
+  if (e.target.nodeName !== "IMG") return;
+// or   if (e.target.classList.contains("gallery")) return;
 
-const onGalleryImgClick = (e) => {
-    if (e.target.nodeName !== 'IMG') return;
+  const origImg = e.target.dataset.source;
+  const instance = basicLightbox.create(`
+    <img src="${origImg}" alt=""/>
+`);
+  instance.show();
+  window.addEventListener("keydown", onEscClick);
 
-    createLightboxInstance(e);
-    e.preventDefault();
-};
-
-galleryContainerRef.addEventListener('click', onGalleryImgClick);
-
-console.log(galleryItems);
+  function onEscClick(event) {
+    if (event.code === "Escape") {
+      instance.close();
+      window.removeEventListener("keydown", onEscClick);
+    }
+  }
+}
